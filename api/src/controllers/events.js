@@ -37,16 +37,14 @@ export async function getEvents(req, res, next) {
 
         const filters = {}; // TODO: map req.query filters here
 
-        // Run queries in parallel for better performance
-        const [data, totalItems] = await Promise.all([
-            listEvents(filters, {
-                limit: PAGE_SIZE,
-                offset,
-                orderBy: "id",
-                order: "asc",
-            }),
-            countEvents(filters),
-        ]);
+        const data = await listEvents(filters, {
+            limit: PAGE_SIZE,
+            offset,
+            orderBy: "id",
+            order: "asc",
+        });
+
+        const totalItems = await countEvents(filters)
 
         const totalPages = Math.ceil(totalItems / PAGE_SIZE);
 
