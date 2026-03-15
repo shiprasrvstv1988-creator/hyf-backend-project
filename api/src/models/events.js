@@ -3,6 +3,27 @@ import db from "#configs/database.js";
 const TABLE = "event";
 
 /**
+ * Event model (MVC example)
+ *
+ * This file intentionally demonstrates how a model file can group multiple
+ * database actions for the same domain entity inside an MVC-style structure.
+ *
+ * The trainee is not expected to already be familiar with MVC as a pattern,
+ * but they are expected to continue working within the structure established
+ * by this skeleton.
+ *
+ * For that reason, this file serves two purposes:
+ * 1. provide working examples of how model functions are organized
+ * 2. show the expected shape of a model as the project grows
+ *
+ * Important:
+ * - Not every function in this file is part of the required trainee scope
+ * - Some functions are included as placeholders to demonstrate structure only
+ * - Optional placeholders should only be implemented if the trainee chooses
+ *   to work on additional / optional features
+ */
+
+/**
  * Returns a base query builder for the event table.
  *
  * @param {import("knex").Knex} [trx=db] - Optional transaction
@@ -15,7 +36,8 @@ function baseQuery(trx = db) {
 /**
  * Count events matching optional filters.
  *
- * Used for pagination metadata (totalItems / totalPages).
+ * This is a working example of a model-layer function used by the controller
+ * to support API response metadata such as totalItems / totalPages.
  *
  * @param {Object} [filters={}]
  * @param {Object} [options={}]
@@ -24,13 +46,12 @@ function baseQuery(trx = db) {
  * @returns {Promise<number>} Total matching rows
  */
 export async function countEvents(filters = {}, options = {}) {
-    let { trx } = options;
-    const qb = baseQuery(trx)
+    const { trx } = options;
+    const qb = baseQuery(trx);
 
-    // TODO: apply filters
+    // TODO (required project work): apply supported filters when filter features are implemented
 
     const row = await qb.count({ count: "*" }).first();
-
     const count = row?.count ?? row?.["count(*)"] ?? 0;
 
     return Number(count);
@@ -39,9 +60,11 @@ export async function countEvents(filters = {}, options = {}) {
 /**
  * List events with optional filters and offset-based pagination.
  *
+ * This is a working example of a model-layer "read many" function.
+ *
  * NOTE:
- * - Supports limit + offset only.
- * - Page calculation should be handled at API/controller level.
+ * - Supports limit + offset only
+ * - Page calculation should be handled at API/controller level
  *
  * @param {Object} [filters={}]
  * @param {string} [filters.currency]
@@ -67,7 +90,7 @@ export async function listEvents(filters = {}, options = {}) {
 
     const qb = baseQuery(trx).select("*");
 
-    // TODO: apply filters
+    // TODO (required project work): apply supported filters
 
     qb.orderBy(
         orderBy,
@@ -79,6 +102,8 @@ export async function listEvents(filters = {}, options = {}) {
 
 /**
  * Find a single event by id.
+ *
+ * This is a working example of a model-layer "read one" function.
  *
  * @param {number|string} id
  * @param {Object} [options={}]
@@ -95,36 +120,48 @@ export async function findEventById(id, { trx } = {}) {
 }
 
 /**
- * Create a new event.
+ * OPTIONAL STRUCTURE PLACEHOLDER
  *
- * TODO:
- * - Validate input
- * - Insert row
- * - Return created row (dialect-safe)
+ * This function is included to demonstrate that a model file in this project
+ * may contain multiple actions for the same entity, not only "list" and "find".
+ *
+ * It is NOT part of the required trainee scope unless optional/admin features
+ * are explicitly implemented.
+ *
+ * If optional admin functionality is added, this placeholder can be replaced
+ * with a real implementation.
  */
 export async function createEvent() {
-    throw new Error("TODO: createEvent is not implemented yet");
+    throw new Error(
+        "Optional placeholder: createEvent is intentionally not implemented in the base skeleton"
+    );
 }
 
 /**
- * Update an existing event by id.
+ * OPTIONAL STRUCTURE PLACEHOLDER
  *
- * TODO:
- * - Validate patch fields
- * - Perform update
- * - Return updated row (or null if not found)
+ * This function exists only as an example of expected MVC model structure for
+ * future entity actions.
+ *
+ * It is NOT required for the base trainee project unless optional/admin scope
+ * is added.
  */
 export async function updateEvent() {
-    throw new Error("TODO: updateEvent is not implemented yet");
+    throw new Error(
+        "Optional placeholder: updateEvent is intentionally not implemented in the base skeleton"
+    );
 }
 
 /**
- * Delete an event by id.
+ * OPTIONAL STRUCTURE PLACEHOLDER
  *
- * TODO:
- * - Delete row
- * - Return true/false depending on whether a row was deleted
+ * This function exists only to illustrate how additional model actions would
+ * be placed in the same MVC model file.
+ *
+ * It is NOT part of the required trainee implementation in the default scope.
  */
 export async function deleteEvent() {
-    throw new Error("TODO: deleteEvent is not implemented yet");
+    throw new Error(
+        "Optional placeholder: deleteEvent is intentionally not implemented in the base skeleton"
+    );
 }
