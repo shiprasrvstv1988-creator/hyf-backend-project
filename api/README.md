@@ -49,13 +49,34 @@ The `db:setup` command is useful when:
 
 ### Important for trainees
 
-Knex migrations and seeds are an **advanced database management technique** often used in professional backend projects.
+This skeleton includes a simple **MVC-style structure**:
+
+- **Routers** define API endpoints
+- **Controllers** handle HTTP request/response logic
+- **Models** contain database access logic
+
+MVC is introduced intentionally in this project, even if it has not been deeply covered as a formal pattern during the course.
+
+The reason is to simulate a more realistic backend project environment:
+you may join a codebase where the overall structure was already chosen by a more experienced developer, and your task is to understand it, follow it, and continue building within it.
+
+At the same time, this project keeps the implementation aligned with the JavaScript level of the course:
+
+- modules and exported functions
+- no class-based OOP requirement
+- no advanced framework abstractions
+- SQL and Knex used in a direct and readable way
+
+So while the **project structure** is slightly more professional and opinionated than a blank beginner project, the **coding style itself** remains intentionally simple and compatible with the modular JavaScript you have learned.
+
+Knex migrations and seeds are also included as an **advanced database management technique** often used in professional backend projects.
 
 For your tasks, assignments and learning purposes, you are expected to:
 
-- Design your own database schema
-- Write your own SQL queries
-- Understand how your tables are structured
+- design your own database schema
+- write your own SQL queries
+- understand how your tables are structured
+- continue working within the provided MVC structure
 
 You should not rely blindly on the provided migrations if your assignment requires you to build your own schema.  
 If needed, modify or remove the existing migrations and seeds to match your database assignments.
@@ -162,3 +183,4 @@ In the next screen you'll see the output of your build step which is downloading
 Once you see the text "Your service is live" you can test your API with Postman by using the deployed URL, which should be something like `https://hyf-template-api.onrender.com/api`. You should see the output the response from your "/" route.
 
 If you've got this far, you probably want to deploy your web app next. Head over to the README.md in your app directory for instructions.
+
