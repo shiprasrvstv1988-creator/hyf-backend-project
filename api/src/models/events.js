@@ -49,7 +49,13 @@ export async function countEvents(filters = {}, options = {}) {
   const { trx } = options;
   const qb = baseQuery(trx);
 
-  // TODO (required project work): apply supported filters when filter features are implemented
+  if (filters.search) {
+    qb.where((builder) => {
+      builder
+        .where("title", "like", `%${filters.search}%`)
+        .orWhere("description", "like", `%${filters.search}%`);
+    });
+  }
 
   const row = await qb.count({ count: "*" }).first();
   const count = row?.count ?? row?.["count(*)"] ?? 0;
@@ -86,7 +92,14 @@ export async function listEvents(filters = {}, options = {}) {
 
   const qb = baseQuery(trx).select("*");
 
-  // TODO (required project work): apply supported filters
+  if (filters.search) {
+    qb.where((builder) => {
+      builder
+        .where("title", "like", `%${filters.search}%`)
+        .orWhere("description", "like", `%${filters.search}%`);
+    });
+  }
+
   if (limit !== undefined) qb.limit(limit);
   if (offset !== undefined) qb.offset(offset);
 
