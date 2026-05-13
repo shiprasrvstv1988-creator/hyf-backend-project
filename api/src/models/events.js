@@ -82,7 +82,13 @@ export async function countEvents(filters = {}, options = {}) {
  * @returns {Promise<Array<Object>>}
  */
 export async function listEvents(filters = {}, options = {}) {
-  const { limit, offset, orderBy = "id", order = "asc", trx } = options;
+    const {
+        limit,
+        offset,
+        orderBy = "id",
+        order = "asc",
+        trx,
+    } = options;
 
   const qb = baseQuery(trx).select("*");
 
@@ -92,7 +98,15 @@ export async function listEvents(filters = {}, options = {}) {
 
   qb.orderBy(orderBy, String(order).toLowerCase() === "desc" ? "desc" : "asc");
 
-  return qb;
+    if (Number.isInteger(limit) && limit > 0) {
+        qb.limit(limit);
+    }
+
+    if (Number.isInteger(offset) && offset >= 0) {
+        qb.offset(offset);
+    }
+
+    return qb;
 }
 
 /**
@@ -154,7 +168,7 @@ export async function updateEvent() {
  * It is NOT part of the required trainee implementation in the default scope.
  */
 export async function deleteEvent() {
-  throw new Error(
-    "Optional placeholder: deleteEvent is intentionally not implemented in the base skeleton"
-  );
+    throw new Error(
+        "Optional placeholder: deleteEvent is intentionally not implemented in the base skeleton"
+    );
 }
