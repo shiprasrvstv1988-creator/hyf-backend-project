@@ -1,6 +1,8 @@
 tags:
   - name: Cart
     description: Shopping cart management for guests and members
+  - name: Orders
+    description: Order history and detailed receipts
 
 paths:
   /api/cart:
@@ -15,7 +17,7 @@ paths:
           required: false
           description: Unique ID for guest users
       responses:
-        201:
+        200:
           description: Success
 
   /api/cart/items:
@@ -27,7 +29,6 @@ paths:
           name: x-guest-id
           schema:
             type: string
-          required: false
       requestBody:
         required: true
         content:
@@ -45,8 +46,6 @@ paths:
       responses:
         201:
           description: Created
-        400:
-          description: Invalid input (Zod validation error)
 
   /api/cart/items/{itemId}:
     put:
@@ -62,7 +61,6 @@ paths:
           name: x-guest-id
           schema:
             type: string
-          required: false
       requestBody:
         required: true
         content:
@@ -76,3 +74,106 @@ paths:
       responses:
         200:
           description: Updated
+    delete:
+      summary: Remove item from cart
+      tags: [Cart]
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: x-guest-id
+          schema:
+            type: string
+      responses:
+        204:
+          description: No Content
+/api/cart/checkout:
+    post:
+      summary: Checkout the current cart
+      description: Converts the cart into a completed order and clears the cart.
+      tags: [Cart]
+      parameters:
+        - in: header
+          name: x-guest-id
+          schema:
+            type: string
+          description: Unique ID for guest checkout (if not logged in)
+      responses:
+        201:
+          description: Checkout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Checkout successful"
+                  orderId:
+                    type: integer
+                    example: 8
+                  total:
+                    type: number
+                    example: 45.50
+
+  /api/orders:
+    get:
+      summary: Retrieve order history
+      tags: [Orders]
+      responses:
+        200:
+          description: A list of orders for the logged-in user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        user_id: { type: integer }
+                        total_price: { type: string }
+                        status: { type: string }
+                        created_at: { type: string, format: date-time }
+
+  /api/orders/{orderId}:
+    get:
+      summary: Get detailed receipt for a specific order
+      tags: [Orders]
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Detailed order info including items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { type: integer }
+                      total_price: { type: string }
+                      status: { type: string }
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: integer }
+                            title: { type: string }
+                            quantity: { type: integer }
+                            unit_price: { type: string }
+        404:
+          description: Order not found
