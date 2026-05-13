@@ -1,0 +1,78 @@
+tags:
+  - name: Cart
+    description: Shopping cart management for guests and members
+
+paths:
+  /api/cart:
+    get:
+      summary: Get the current cart
+      tags: [Cart]
+      parameters:
+        - in: header
+          name: x-guest-id
+          schema:
+            type: string
+          required: false
+          description: Unique ID for guest users
+      responses:
+        201:
+          description: Success
+
+  /api/cart/items:
+    post:
+      summary: Add an item to the cart
+      tags: [Cart]
+      parameters:
+        - in: header
+          name: x-guest-id
+          schema:
+            type: string
+          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [event_id]
+              properties:
+                event_id:
+                  type: integer
+                quantity:
+                  type: integer
+                  minimum: 1
+                  default: 1
+      responses:
+        201:
+          description: Created
+        400:
+          description: Invalid input (Zod validation error)
+
+  /api/cart/items/{itemId}:
+    put:
+      summary: Update item quantity
+      tags: [Cart]
+      parameters:
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: x-guest-id
+          schema:
+            type: string
+          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  minimum: 1
+      responses:
+        200:
+          description: Updated
