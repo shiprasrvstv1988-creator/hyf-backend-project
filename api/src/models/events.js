@@ -49,7 +49,13 @@ export async function countEvents(filters = {}, options = {}) {
   const { trx } = options;
   const qb = baseQuery(trx);
 
-  // TODO (required project work): apply supported filters when filter features are implemented
+  if (filters.search) {
+    qb.where((builder) => {
+      builder
+        .where("title", "like", `%${filters.search}%`)
+        .orWhere("description", "like", `%${filters.search}%`);
+    });
+  }
 
   const row = await qb.count({ count: "*" }).first();
   const count = row?.count ?? row?.["count(*)"] ?? 0;
@@ -82,31 +88,32 @@ export async function countEvents(filters = {}, options = {}) {
  * @returns {Promise<Array<Object>>}
  */
 export async function listEvents(filters = {}, options = {}) {
-    const {
-        limit,
-        offset,
-        orderBy = "id",
-        order = "asc",
-        trx,
-    } = options;
+  const { limit, offset, orderBy = "id", order = "asc", trx } = options;
 
   const qb = baseQuery(trx).select("*");
 
-  // TODO (required project work): apply supported filters
+  if (filters.search) {
+    qb.where((builder) => {
+      builder
+        .where("title", "like", `%${filters.search}%`)
+        .orWhere("description", "like", `%${filters.search}%`);
+    });
+  }
+
   if (limit !== undefined) qb.limit(limit);
   if (offset !== undefined) qb.offset(offset);
 
   qb.orderBy(orderBy, String(order).toLowerCase() === "desc" ? "desc" : "asc");
 
-    if (Number.isInteger(limit) && limit > 0) {
-        qb.limit(limit);
-    }
+  if (Number.isInteger(limit) && limit > 0) {
+    qb.limit(limit);
+  }
 
-    if (Number.isInteger(offset) && offset >= 0) {
-        qb.offset(offset);
-    }
+  if (Number.isInteger(offset) && offset >= 0) {
+    qb.offset(offset);
+  }
 
-    return qb;
+  return qb;
 }
 
 /**
@@ -168,7 +175,7 @@ export async function updateEvent() {
  * It is NOT part of the required trainee implementation in the default scope.
  */
 export async function deleteEvent() {
-    throw new Error(
-        "Optional placeholder: deleteEvent is intentionally not implemented in the base skeleton"
-    );
+  throw new Error(
+    "Optional placeholder: deleteEvent is intentionally not implemented in the base skeleton"
+  );
 }
