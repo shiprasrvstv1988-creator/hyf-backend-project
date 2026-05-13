@@ -149,3 +149,98 @@ export async function updateCartItem(req, res, next) {
     next(error);
   }
 }
+
+// DELETE /api/cart/items/:itemId
+export async function removeCartItem(req, res, next) {
+  try {
+    const { itemId } = req.params;
+    const userId = req.user?.id;
+    const guestId = req.headers["x-guest-id"];
+
+    // 1. Find the item and verify ownership through the parent cart
+    const item = await knex("cart_item")
+      .join("cart", "cart_item.cart_id", "cart.id")
+      .where("cart_item.id", itemId)
+      .where(function () {
+        if (userId) this.where("cart.user_id", userId);
+        else this.where("cart.guest_id", guestId);
+      })
+      .first();
+
+    if (!item) {
+      return res.status(404).json({ error: "Item not found in your cart" });
+    }
+
+    // 2. Delete the specific line
+    await knex("cart_item").where({ id: itemId }).del();
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+}
+
+// POST /api/cart/checkout
+export async function checkout(req, res, next) {
+  const userId = req.user?.id;
+  const guestId = req.headers["x-guest-id"];
+
+  try {
+    //start the transaction
+    await knex.transaction(async (trx) => {
+      // 1. Identify the cart
+      const cart = await trx("cart")
+        .where(userId ? { user_id: userId } : { guest_id: guestId })
+        .first();
+
+      if (!cart) throw new Error("Cart not found");
+
+      // 2. Get all items in the cart (Convert active cart - order)
+      const items = await trx("cart_item")
+        .join("event", "cart_item.event_id", "event.id")
+        .where({ cart_id: cart.id })
+        .select("cart_item.*", "event.price as current_price");
+
+      if (items.length === 0) throw new Error("Cart is empty");
+
+      // 3. Calculate total
+      const total = items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
+      // 4. Create the Order
+      const [order] = await trx("customer_order")
+        .insert({
+          user_id: userId || null,
+          total_price: total,
+          status: "completed",
+        })
+        .returning("*");
+
+      // 5. Create order items
+      const orderItems = items.map((item) => ({
+        customer_order_id: order.id,
+        event_id: item.event_id,
+        quantity: item.quantity,
+        unit_price: item.current_price,
+      }));
+      await trx("order_item").insert(orderItems);
+
+      // 6. Clear the cart
+      await trx("cart_item").where({ cart_id: cart.id }).del();
+
+      res.status(201).json({
+        message: "Checkout successful",
+        orderId: order.id,
+        total,
+      });
+    });
+  } catch (error) {
+    // If any error occurs inside the transaction, Knex rolls it back automatically
+    if (error.message === "Cart is empty") {
+      return res.status(400).json({ error: error.message });
+    }
+    next(error);
+  }
+}
