@@ -90,7 +90,7 @@ paths:
       responses:
         204:
           description: No Content
-/api/cart/checkout:
+  /api/cart/checkout:
     post:
       summary: Checkout the current cart
       description: Converts the cart into a completed order and clears the cart.
